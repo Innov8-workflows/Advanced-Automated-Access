@@ -1467,14 +1467,26 @@ form{background:var(--card);border:1px solid var(--card-line);border-radius:var(
       });
     }
 
-    if (!reduce){
-      var p0 = vids[0].play(); if (p0 && p0.catch) p0.catch(function(){});
-      /* wait for a real duration before scheduling, metadata may not be in yet */
-      if (vids[0].readyState >= 1) queue();
-      else vids[0].addEventListener("loadedmetadata", queue, { once: true });
-      /* warm the next clip so the crossfade is not a black frame */
-      setTimeout(function(){ vids.slice(1).forEach(function(v){ try { v.load(); } catch(e){} }); }, 1500);
-    }
+    /* NEVER gate playback on prefers-reduced-motion. A hero that does not run
+       reads as broken, and that is the most expensive recurring bug in this kit.
+       The preference is honoured in CSS instead: under reduce the crossfade is
+       an instant cut rather than an animated fade. */
+    var armRetry = function(){
+      var retry = function(){
+        var q = vids[hv].play(); if (q && q.catch) q.catch(function(){});
+      };
+      ["pointerdown", "touchstart", "keydown", "scroll"].forEach(function(e){
+        window.addEventListener(e, retry, { once: true, passive: true });
+      });
+    };
+    var p0 = vids[0].play();
+    if (p0 && p0.catch) p0.catch(armRetry);   /* iOS low power, strict settings */
+
+    /* the cycle runs either way, so a blocked autoplay degrades to the posters
+       moving rather than one frozen frame */
+    if (vids[0].readyState >= 1) queue();
+    else vids[0].addEventListener("loadedmetadata", queue, { once: true });
+    setTimeout(function(){ vids.slice(1).forEach(function(v){ try { v.load(); } catch(e){} }); }, 1500);
   }
 
   /* ---------- before / after sliders ----------
@@ -1610,7 +1622,7 @@ form{background:var(--card);border:1px solid var(--card-line);border-radius:var(
     if (document.hidden){
       clearTimeout(heroTimer);
       vids.forEach(function(v){ try { v.pause(); } catch(e){} });
-    } else if (!reduce && vids.length){
+    } else if (vids.length){
       var p = vids[hv].play(); if (p && p.catch) p.catch(function(){});
       queue();
     }

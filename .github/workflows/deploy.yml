@@ -1,5 +1,3 @@
-# Deploy via Actions, not the legacy Jekyll builder - that fails on several of
-# these repos and gives no useful error when it does.
 name: Deploy to GitHub Pages
 on:
   push:
