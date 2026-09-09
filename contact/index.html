@@ -51,10 +51,64 @@
       <h2>Office and factory</h2>
       <p>Unit 25 Skylark House<br>Fenttiman Road<br>Canvey Island<br>SS8 0EQ</p>
       <h2>Opening hours</h2><p>Monday to Friday, 8am to 6pm.</p>
-      <h2>Get in touch</h2>
-      <p><a class="btn btn-primary" href="mailto:info@aaauk.co.uk" data-track="email">Email info@aaauk.co.uk</a></p>
-      <p><a class="btn btn-ghost" href="tel:+441277812472" data-track="call">Call 01277 812472</a></p>
-      </div></div></section>
+      <p><a class="btn btn-ghost" href="tel:+441277812472" data-track="call">Call 01277 812472</a>
+         <a class="btn btn-ghost" href="mailto:info@aaauk.co.uk" data-track="email">Email info@aaauk.co.uk</a></p>
+      <h2>Send us an enquiry</h2>
+      <p>Fill this in and it comes straight through to the office. If you have drawings or a schedule, say so and we will come back for them.</p>
+      </div>
+      
+<form id="enqForm" class="rv" action="https://api.web3forms.com/submit" method="POST" novalidate style="max-width:74ch">
+  <input type="hidden" name="access_key" value="5b27b11b-45c3-4a45-a076-ad96804dfc4f">
+  <input type="hidden" name="subject" value="Website enquiry - AAA">
+  <input type="hidden" name="from_name" value="Advanced Automated Access Ltd website">
+  <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
+  <div class="f2">
+    <label class="field"><span>Your name</span><input type="text" name="name" required autocomplete="name" placeholder="Jane Smith"></label>
+    <label class="field"><span>Phone</span><input type="tel" name="phone" required autocomplete="tel" placeholder="01277 000000"></label>
+  </div>
+  <div class="f2">
+    <label class="field"><span>Email</span><input type="email" name="email" required autocomplete="email" placeholder="jane@company.co.uk"></label>
+    <label class="field"><span>Company</span><input type="text" name="company" autocomplete="organization" placeholder="Main contractor or client"></label>
+  </div>
+  <label class="field"><span>What do you need</span>
+    <select name="enquiry"><option>Aluminium Curtain Walling</option><option>Aluminium Windows and Doors</option><option>Automatic Door Systems</option><option>Automatic Door Servicing and Repair</option><option>Roller Shutters</option><option>Steel Doors</option><option>Aluminium Louvres and Louvred Screens</option><option>Shopfronts, Canopies and Brise Soleil</option><option>Breakdown, a door is not working</option><option>Something else</option></select>
+  </label>
+  <label class="field"><span>Site address and postcode</span><input type="text" name="site" autocomplete="postal-code" placeholder="Site town and postcode"></label>
+  <label class="field"><span>Tell us about the package</span><textarea name="details" placeholder="Rough size of the elevation or the number of doors, the programme dates and anything already drawn."></textarea></label>
+  <button class="btn btn-primary btn-block" type="submit" id="enqSend">Send enquiry</button>
+  <p class="form-note" id="enqNote" role="status" aria-live="polite">Goes straight to the office. We normally come back the same working day.</p>
+</form>
+<script>
+(function(){
+  var f = document.getElementById("enqForm"), n = document.getElementById("enqNote"), b = document.getElementById("enqSend");
+  f.addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = function(k){ return (f.elements[k] && f.elements[k].value || "").trim(); };
+    var missing = ["name","phone","email"].filter(function(k){ return !v(k); });
+    if (missing.length){
+      var bad = f.elements[missing[0]];
+      bad.focus(); bad.style.borderColor = "#E4574C";
+      setTimeout(function(){ bad.style.borderColor = ""; }, 2200);
+      n.textContent = "Please fill in your name, phone and email.";
+      return;
+    }
+    f.elements.subject.value = v("enquiry") + " enquiry from " + v("name") + (v("company") ? " at " + v("company") : "");
+    var restore = b.innerHTML;
+    b.disabled = true; b.textContent = "Sending..."; n.textContent = "Sending your enquiry.";
+    fetch("https://api.web3forms.com/submit", { method: "POST", headers: { "Accept": "application/json" }, body: new FormData(f) })
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if (!j || !j.success) throw new Error("rejected");
+        f.innerHTML = '<div class="inshort" style="margin:0"><p><b>Thank you, that is with us.</b><br>Your enquiry has been sent to the office and we will come back to you, normally the same working day. If a door has broken down, please ring <a href="tel:+441277812472">01277 812472</a>.</p></div>';
+      })
+      .catch(function(){
+        b.disabled = false; b.innerHTML = restore;
+        n.innerHTML = 'That did not send. Please ring <a href="tel:+441277812472">01277 812472</a> or email <a href="mailto:info@aaauk.co.uk">info@aaauk.co.uk</a>.';
+      });
+  });
+})();
+</script>
+      </div></section>
 </main>
 
 <footer class="foot s-dark">

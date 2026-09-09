@@ -1228,7 +1228,7 @@ form{background:var(--card);border:1px solid var(--card-line);border-radius:var(
     <div class="center rv">
       <span class="eyebrow">Get in touch</span>
       <h2 class="title">Send us the drawings</h2>
-      <p class="lede">Fill this in and it opens your email with the details already written out, ready for you to attach a drawing or a schedule.</p>
+      <p class="lede">Fill this in and it comes straight through to the office. If you have drawings or a schedule, say so and we will come back for them.</p>
     </div>
     <div class="form-grid">
       <div class="contact-list rv">
@@ -1254,33 +1254,39 @@ form{background:var(--card);border:1px solid var(--card-line);border-radius:var(
         </div>
       </div>
 
-      <form id="quoteForm" class="rv" novalidate>
+      <form id="quoteForm" class="rv" action="https://api.web3forms.com/submit" method="POST" novalidate>
+        <input type="hidden" name="access_key" value="5b27b11b-45c3-4a45-a076-ad96804dfc4f">
+        <input type="hidden" name="subject" value="Website enquiry - AAA">
+        <input type="hidden" name="from_name" value="Advanced Automated Access Ltd website">
+        <!-- Web3Forms honeypot. Bots fill it, people never see it. -->
+        <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
         <div class="f2">
           <label class="field"><span>Your name</span><input type="text" name="name" required autocomplete="name" placeholder="Jane Smith"></label>
           <label class="field"><span>Phone</span><input type="tel" name="phone" required autocomplete="tel" placeholder="01277 000000"></label>
         </div>
         <div class="f2">
+          <label class="field"><span>Email</span><input type="email" name="email" required autocomplete="email" placeholder="jane@company.co.uk"></label>
           <label class="field"><span>Company</span><input type="text" name="company" autocomplete="organization" placeholder="Main contractor or client"></label>
-          <label class="field"><span>What do you need</span>
-            <select name="service">
-              <option>Aluminium curtain walling</option>
-              <option>Aluminium windows and doors</option>
-              <option>Shopfronts, canopies and brise soleil</option>
-              <option>Automatic door systems</option>
-              <option>Roller shutters and steel doors</option>
-              <option>Servicing, repair and maintenance</option>
-              <option>Breakdown, a door is not working</option>
-              <option>Something else</option>
-            </select>
-          </label>
         </div>
-        <label class="field"><span>Site address and postcode</span><input type="text" name="area" autocomplete="postal-code" placeholder="Site town and postcode"></label>
-        <label class="field"><span>Tell us about the package</span><textarea name="detail" placeholder="Rough size of the elevation or the number of doors, the programme dates and anything already drawn."></textarea></label>
-        <button class="btn btn-primary btn-block" type="submit">
+        <label class="field"><span>What do you need</span>
+          <select name="enquiry">
+            <option>Aluminium curtain walling</option>
+            <option>Aluminium windows and doors</option>
+            <option>Shopfronts, canopies and brise soleil</option>
+            <option>Automatic door systems</option>
+            <option>Roller shutters and steel doors</option>
+            <option>Servicing, repair and maintenance</option>
+            <option>Breakdown, a door is not working</option>
+            <option>Something else</option>
+          </select>
+        </label>
+        <label class="field"><span>Site address and postcode</span><input type="text" name="site" autocomplete="postal-code" placeholder="Site town and postcode"></label>
+        <label class="field"><span>Tell us about the package</span><textarea name="details" placeholder="Rough size of the elevation or the number of doors, the programme dates and anything already drawn."></textarea></label>
+        <button class="btn btn-primary btn-block" type="submit" id="quoteSend">
           <svg class="icon" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
-          Send by email
+          Send enquiry
         </button>
-        <p class="form-note">This opens your own email with the message ready to send, so you can attach drawings before it goes. Nothing is sent until you press send yourself.</p>
+        <p class="form-note" id="quoteNote" role="status" aria-live="polite">Goes straight to the office. We normally come back the same working day.</p>
       </form>
     </div>
   </div>
@@ -1585,36 +1591,59 @@ form{background:var(--card);border:1px solid var(--card-line);border-radius:var(
     if (e.key === "Escape" && work.classList.contains("open")) closeWork();
   });
 
-  /* ---------- contact form to email ----------
-     The golden body hands this to WhatsApp. AAA has a landline and no mobile
-     supplied, and a contractor sending a schedule of doors wants to attach a
-     drawing, so it composes a mail draft instead. */
-  document.getElementById("quoteForm").addEventListener("submit", function(e){
+  /* ---------- contact form: Web3Forms ----------
+     action/method stay on the element so the form still posts with JS off.
+     With JS on, fetch keeps the visitor here. FormData, not JSON, so the
+     request stays CORS-simple and cannot be lost to a refused preflight. */
+  var qForm = document.getElementById("quoteForm");
+  var qNote = document.getElementById("quoteNote");
+  var qBtn = document.getElementById("quoteSend");
+
+  qForm.addEventListener("submit", function(e){
     e.preventDefault();
     var f = e.target;
     var v = function(k){ return (f.elements[k] && f.elements[k].value || "").trim(); };
-    if (!v("name") || !v("phone")){
-      var bad = !v("name") ? f.elements.name : f.elements.phone;
+
+    var missing = ["name", "phone", "email"].filter(function(k){ return !v(k); });
+    if (missing.length){
+      var bad = f.elements[missing[0]];
       bad.focus();
       bad.style.borderColor = "#E4574C";
       setTimeout(function(){ bad.style.borderColor = ""; }, 2200);
+      qNote.textContent = "Please fill in your name, phone and email.";
       return;
     }
-    var lines = [
-      "Hello Advanced Automated Access Ltd,",
-      "",
-      "Name: " + v("name"),
-      "Phone: " + v("phone"),
-      "Company: " + (v("company") || "Not given"),
-      "Enquiry: " + v("service"),
-      "Site: " + (v("area") || "Not given"),
-      "",
-      "Details: " + (v("detail") || "Not given")
-    ];
-    var url = "mailto:" + EMAIL +
-      "?subject=" + encodeURIComponent("Website enquiry: " + v("service")) +
-      "&body=" + encodeURIComponent(lines.join("\n"));
-    window.location.href = url;
+
+    /* a subject the office can scan in a full inbox */
+    f.elements.subject.value = v("enquiry") + " enquiry from " + v("name") +
+      (v("company") ? " at " + v("company") : "");
+
+    var restore = qBtn.innerHTML;
+    qBtn.disabled = true;
+    qBtn.textContent = "Sending...";
+    qNote.textContent = "Sending your enquiry.";
+
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Accept": "application/json" },
+      body: new FormData(f)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (j && j.success){
+        f.innerHTML = '<div class="inshort" style="margin:0"><p><b>Thank you, that is with us.</b><br>' +
+          'Your enquiry has been sent to the office and we will come back to you, normally the same working day. ' +
+          'If it is urgent, or a door has broken down, please ring <a href="tel:+441277812472" data-track="call">01277 812472</a>.</p></div>';
+      } else {
+        throw new Error((j && j.message) || "Web3Forms rejected the submission");
+      }
+    })
+    .catch(function(){
+      qBtn.disabled = false;
+      qBtn.innerHTML = restore;
+      qNote.innerHTML = 'That did not send. Please ring <a href="tel:+441277812472" data-track="call">01277 812472</a> ' +
+        'or email <a href="mailto:info@aaauk.co.uk" data-track="email">info@aaauk.co.uk</a> and we will pick it up.';
+    });
   });
 
   /* ---------- pause timers while the tab is hidden ---------- */
