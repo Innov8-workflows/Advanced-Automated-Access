@@ -6,9 +6,9 @@
    ========================================================= */
 :root{
   /* --- palette: derived from the client logo --- */
-  --brand:#EC0215;        --brand-rgb:236,2,21;
-  --brand-lt:#FF4854;
-  --brand-dp:#A80912;
+  --brand:#A82F48;        --brand-rgb:168,47,72;
+  --brand-lt:#DE6376;
+  --brand-dp:#8E2A40;
   --brand2:#4E7A99;       --brand2-rgb:78,122,153;
   --brand2-lt:#84AECA;
   --brand2-dk:#2E5871;
@@ -39,8 +39,8 @@
   /* --- the areas band --- */
   --band-bg:#0C1013;
   --band-g1:#141C21;
-  --band-g2:#1D1114;
-  --chip-core-bg:#2A1216;
+  --band-g2:#1E1319;
+  --chip-core-bg:#2B151E;
 
   /* --- hero rhythm: logo leads, headline supports (Redline / Fairmont) --- */
   --hero-logo:clamp(250px,46vw,560px);
@@ -772,10 +772,10 @@ form{background:var(--card);border:1px solid var(--card-line);border-radius:var(
 
 /* Per-project geometry only. Colour and type stay with the art direction. */
 
-/* The AAA logo is a 2.475:1 lockup, not a square badge. The golden .hero-logo is
+/* The AAA logo is a 2.5:1 lockup, not a square badge. The golden .hero-logo is
    a 1:1 box, which would leave 40% of its height as dead transparent space and
    push the headline down the fold. */
-.hero-logo{aspect-ratio:2.475/1}
+.hero-logo{aspect-ratio:2.5/1}
 
 /* .zig-media is built around a 4/5 portrait video. These are architectural
    elevations shot landscape - forcing them into 4/5 crops the building out. */
@@ -800,12 +800,21 @@ form{background:var(--card);border:1px solid var(--card-line);border-radius:var(
   .hero-vid{transition:none}
 }
 
+/* Accreditation marks in the footer. The source artwork is JPEG on white, so
+   on the dark footer they take a deliberate white plate rather than reading as
+   stray boxes. Brand marks keep their own colour, never tinted by the art
+   direction. NOTE: duplicated in buildout.js sharedCss(), because the homepage
+   uses its own inline <style> and never loads /assets/site.css. */
+.accred-logos{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.accred-logos img{height:44px;width:auto;background:#fff;border-radius:6px;padding:5px 7px}
+.accred p{margin:0;font-size:12.4px;line-height:1.55}
 /* Address sits in a contact row that is not a link, so it wraps as body text. */
 .contact-row .addr{font-weight:400;font-size:14px;line-height:1.5;display:block}
 
-/* .socials svg is filled, because the two it was written for (Facebook,
-   WhatsApp) are solid brand marks. A stroked Lucide mail icon in that slot
-   renders as a solid black rectangle - the CSS fill beats the SVG attribute. */
+/* .socials svg is filled, because the kit wrote it for solid brand marks.
+   The LinkedIn mark is solid so it is fine; a stroked Lucide mail icon in that
+   slot renders as a black rectangle, because the CSS fill beats the SVG
+   attribute. Hence the override below. */
 .socials a[data-track="email"] svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---- build-out additions. Layout only; colour stays with the direction. ---- */
@@ -814,7 +823,59 @@ form{background:var(--card);border:1px solid var(--card-line);border-radius:var(
 .crumb a{color:var(--fg-muted);text-decoration:none}
 .crumb a:hover{color:var(--accent)}
 .crumb span{opacity:.5;padding:0 6px}
-.prose{max-width:74ch}
+/* Systems suppliers. Text tiles until the client sends logo artwork -
+   manufacturer marks are not something to fabricate or hotlink. */
+.suppliers{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+.suppliers div{background:var(--card);border:1px solid var(--card-line);border-radius:var(--r);padding:20px 16px;text-align:center;display:grid;place-items:center;min-height:88px}
+.suppliers b{font-family:var(--font-display);font-size:15px;color:var(--fg);line-height:1.3}
+/* Accreditation marks. The source artwork is JPEG on white, so on the dark
+   footer they get a deliberate white plate rather than reading as stray boxes.
+   Brand marks keep their own colour and are never tinted by the direction. */
+.accred-logos{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.accred-logos img{height:46px;width:auto;background:#fff;border-radius:6px;padding:6px 8px}
+.accred p{margin:0;font-size:12.5px}
+@media(max-width:860px){.suppliers{grid-template-columns:repeat(2,1fr)}}
+/* Contact page: the written address sits beside the map rather than above it. */
+.contactgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(24px,3.5vw,44px);align-items:start;margin-top:8px}
+.contactgrid .prose{max-width:none}
+.mapwrap{position:relative;aspect-ratio:4/3;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--card-line);background:var(--card)}
+.mapwrap iframe{width:100%;height:100%;border:0;display:block}
+.mapload{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--card);border:0;cursor:pointer;color:var(--fg-muted);text-align:center;padding:24px;font:inherit}
+.mapload:hover{background:var(--card-hi);color:var(--fg)}
+.mapload svg{width:30px;height:30px;color:var(--accent)}
+.mapload b{font-family:var(--font-display);font-size:15.5px;color:var(--fg)}
+.mapload span{font-size:12.8px;max-width:24ch;line-height:1.45}
+@media(max-width:860px){.contactgrid{grid-template-columns:1fr}}
+/* Two-column shell for content pages.
+   Before this, .prose was capped at 74ch and left-aligned with no
+   margin-inline:auto, so text sat in a ~570px column inside a ~1084px
+   container while .tiles/.linkgrid/.shots ran full width beneath it. That
+   alternation is what read as a ragged right edge. The grid closes the gap and
+   buys a contact route on every content page, which none of them had above the
+   footer. Inside .pagemain the column sets the measure, so .prose drops its cap. */
+.pagegrid{display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:clamp(28px,4vw,52px);align-items:start}
+.pagemain{min-width:0}
+.pagemain .prose{max-width:none}
+.pageside{position:sticky;top:96px;display:grid;gap:14px}
+.sidecard{background:var(--card);border:1px solid var(--card-line);border-radius:var(--r-lg);padding:20px}
+.sidecard b{display:block;font-family:var(--font-display);font-size:16.5px;color:var(--fg);line-height:1.3}
+.sidecard p{margin-top:8px;font-size:13.6px;color:var(--fg-muted);line-height:1.6}
+.sidecard .btn{margin-top:14px}
+.sidecall{display:block;margin-top:12px;text-align:center;font-family:var(--font-display);font-weight:700;font-size:19px;color:var(--accent);text-decoration:none}
+.sidecall:hover{text-decoration:underline}
+.sidehours{display:block;margin-top:4px;text-align:center;font-size:12.4px;color:var(--fg-muted)}
+.sidelinks{background:var(--card);border:1px solid var(--card-line);border-radius:var(--r-lg);padding:18px 20px}
+.sidelinks b{display:block;font-family:var(--font-display);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-muted);margin-bottom:6px}
+.sidelinks a{display:block;padding:8px 0;font-size:14px;color:var(--fg-2);text-decoration:none;border-top:1px solid var(--card-line);line-height:1.35}
+.sidelinks a:hover{color:var(--accent)}
+@media(max-width:1024px){
+  .pagegrid{grid-template-columns:1fr}
+  .pageside{position:static;margin-top:34px}
+}
+
+/* Pages without a sidebar still had the 74ch cap. 92ch is past the classic
+   readability limit but these are hub pages of links, not long prose. */
+.prose{max-width:92ch}
 .prose p{margin-top:14px;color:var(--fg-muted);font-size:15.4px;line-height:1.68}
 .prose h2{margin-top:38px;font-size:clamp(21px,3.2vw,28px);color:var(--fg)}
 .prose h3{margin-top:24px;font-size:17.5px;color:var(--fg)}
