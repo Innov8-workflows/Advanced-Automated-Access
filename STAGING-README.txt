@@ -1,4 +1,4 @@
-Staging copy of the Advanced Automated Access site.
+Staging copy of the Advanced Automated Access site (dark variant).
 
 Built from _site with every root-absolute path prefixed with /Advanced-Automated-Access so it works
 from a GitHub Pages project subpath. Every page is noindex.
